@@ -307,6 +307,18 @@ export async function getObra(id: number): Promise<Obra | null> {
   };
 }
 
+export async function getClientes(): Promise<{ id: number; nome: string }[]> {
+  if (!supabaseConfigured) {
+    return [
+      { id: 1, nome: "Construtora Vega" },
+      { id: 2, nome: "Incorporadora Litoral" },
+    ];
+  }
+  const supabase = await createClient();
+  const { data } = await supabase.from("clientes").select("id,nome").order("nome");
+  return data ?? [];
+}
+
 /* ---- derivados ---- */
 
 export function progressoEtapas(etapas: ObraEtapa[]): {

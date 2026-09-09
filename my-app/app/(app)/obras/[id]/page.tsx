@@ -1,17 +1,22 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, CalendarDays, CalendarClock, Wallet, TrendingDown, TrendingUp, ListChecks } from "lucide-react";
-import { getObra, progressoEtapas } from "@/lib/obra";
+import { getObra, getClientes, progressoEtapas } from "@/lib/obra";
 import { brl, dateBR } from "@/lib/format";
 import { StatCard } from "@/components/stat-card";
 import { Pill, OBRA_STATUS } from "@/components/status-pill";
 import { EtapasAndamento } from "@/components/obra/etapas-andamento";
 import { FinanceiroCard } from "@/components/obra/financeiro-card";
 import { FaltasTabela } from "@/components/obra/faltas-tabela";
+import { EditarObraModal } from "@/components/obra/editar-obra";
 
 export default async function ObraPage(props: PageProps<"/obras/[id]">) {
   const { id } = await props.params;
-  const obra = await getObra(Number(id));
+  const [obra, clientes] = await Promise.all([
+    getObra(Number(id)),
+    getClientes(),
+  ]);
   if (!obra) notFound();
 
   const fin = obra.financeiro;
@@ -47,12 +52,13 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
           </div>
 
           <div className="flex gap-2">
-            <button
-              type="button"
+            <Link
+              href="?editar=1"
+              scroll={false}
               className="rounded-lg border border-line-strong bg-card px-3.5 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-surface"
             >
               Editar obra
-            </button>
+            </Link>
             <button
               type="button"
               className="rounded-lg bg-steel px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-steel-600"
@@ -128,6 +134,23 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
 
       {/* material pendente */}
       <FaltasTabela faltas={obra.faltas} />
+
+      <Suspense fallback={null}>
+        <EditarObraModal
+          obra={{
+            id: obra.id,
+            nome: obra.nome,
+            cliente: obra.cliente,
+            status: obra.status,
+            orcamento_material: fin.orcamento_material,
+            percentual_receita: fin.percentual_receita,
+            data_inicio: obra.data_inicio,
+            data_prevista_termino: obra.data_prevista_termino,
+            descricao: obra.descricao,
+          }}
+          clientes={clientes}
+        />
+      </Suspense>
     </div>
   );
 }

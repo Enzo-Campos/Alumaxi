@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { Card } from "@/components/card";
 import { Pill } from "@/components/status-pill";
@@ -25,13 +26,14 @@ function Row({
         {op && <span className="inline-block w-3 text-center text-faint">{op}</span>}
         {label}
         {editable && (
-          <button
-            type="button"
+          <Link
+            href="?editar=1"
+            scroll={false}
             className="ml-1 text-faint transition-colors hover:text-steel"
             aria-label={`Editar ${label}`}
           >
             <Pencil size={12} />
-          </button>
+          </Link>
         )}
       </span>
       <span

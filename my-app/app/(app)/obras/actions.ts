@@ -3,14 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/env";
-import type { EtapaStatus } from "@/lib/obra";
+import type { EtapaStatus, ObraStatus } from "@/lib/obra";
 import type { Database } from "@/lib/supabase/database.types";
 
 type ObraEtapaUpdate = Database["public"]["Tables"]["obra_etapas"]["Update"];
+type ObraUpdate = Database["public"]["Tables"]["obras"]["Update"];
 type MaterialUnidade = Database["public"]["Enums"]["material_unidade"];
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
 const VALID: EtapaStatus[] = ["pendente", "em_andamento", "concluida", "pausada"];
+const OBRA_STATUS_VALIDOS: ObraStatus[] = [
+  "planejamento",
+  "em_andamento",
+  "pausada",
+  "finalizada",
+  "cancelada",
+];
 
 /** Quantas solicitacoes AINDA bloqueiam a etapa (apenas status `a_comprar`). */
 async function contarPendencias(
@@ -109,6 +117,75 @@ export async function updateEtapaStatus(
 
   revalidatePath(`/obras/${obraId}`);
   return {};
+}
+
+export type EditarObraInput = {
+  nome: string;
+  cliente: string | null; // nome; resolve ou cria o cliente
+  status: ObraStatus;
+  orcamento_material: number;
+  percentual_receita: number;
+  data_inicio: string | null;
+  data_prevista_termino: string | null;
+  descricao: string | null;
+};
+
+/** Edita os campos da obra (inclui orcamento de material e % de receita). */
+export async function updateObra(
+  id: number,
+  input: EditarObraInput,
+): Promise<{ error?: string; ok?: boolean }> {
+  const nome = input.nome.trim();
+  if (!nome) return { error: "Informe o nome da obra." };
+  if (!OBRA_STATUS_VALIDOS.includes(input.status)) return { error: "Status invalido." };
+  if (!(input.orcamento_material >= 0)) return { error: "Orcamento de material invalido." };
+  if (!(input.percentual_receita >= 0 && input.percentual_receita <= 100))
+    return { error: "Percentual de receita deve estar entre 0 e 100." };
+
+  if (!supabaseConfigured) return { ok: true }; // modo demonstracao: sem persistencia
+
+  const supabase = await createClient();
+
+  // resolve o cliente pelo nome (usa existente ou cria um minimo)
+  let id_cliente: number | null = null;
+  const nomeCliente = input.cliente?.trim() || "";
+  if (nomeCliente) {
+    const { data: existente } = await supabase
+      .from("clientes")
+      .select("id")
+      .ilike("nome", nomeCliente)
+      .limit(1)
+      .maybeSingle();
+    if (existente) {
+      id_cliente = existente.id;
+    } else {
+      const { data: criado, error: cliErr } = await supabase
+        .from("clientes")
+        .insert({ nome: nomeCliente })
+        .select("id")
+        .single();
+      if (cliErr || !criado) return { error: cliErr?.message ?? "Falha ao criar o cliente." };
+      id_cliente = criado.id;
+    }
+  }
+
+  const patch: ObraUpdate = {
+    nome,
+    id_cliente,
+    status: input.status,
+    orcamento_material: input.orcamento_material,
+    percentual_receita: input.percentual_receita,
+    data_inicio: input.data_inicio || null,
+    data_prevista_termino: input.data_prevista_termino || null,
+    descricao: input.descricao?.trim() || null,
+  };
+
+  const { error } = await supabase.from("obras").update(patch).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/obras/${id}`);
+  revalidatePath("/obras");
+  return { ok: true };
 }
 
 export type NovaSolicitacaoInput = {
