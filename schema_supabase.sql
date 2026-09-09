@@ -302,7 +302,7 @@ begin
     from falta_materiais
     where id_obra = v_obra
       and id_etapa = v_etapa
-      and status in ('a_comprar', 'comprado');
+      and status = 'a_comprar';   -- so 'a_comprar' bloqueia; 'comprado' ja libera a etapa
 
     if v_pendentes > 0 then
         update obra_etapas
