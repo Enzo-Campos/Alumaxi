@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Alumaxi — design tokens
+   Base: manual-marca.md  (primaria #071033, apoio #666/#999, neutra #f2f2f2)
+   Complementos (nao estao no manual): acao #2E5BFF + cores semanticas
+   Fonte: Montserrat para tudo (--font-montserrat); `font-display` = Montserrat
+   em peso alto, para titulos.
+   ============================================================ */
+
+@theme {
+  /* fontes */
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  /* marca */
+  --color-navy: #071033;          /* primaria */
+  --color-navy-800: #0b1741;
+  --color-navy-700: #142254;      /* hover em superficie escura */
+  --color-navy-600: #22316b;
+
+  --color-ink: #071033;           /* texto sobre claro */
+  --color-muted: #666666;         /* apoio */
+  --color-faint: #999999;         /* apoio 2 / labels */
+
+  --color-surface: #f2f2f2;       /* fundo do app */
+  --color-card: #ffffff;
+  --color-line: rgba(7, 16, 51, 0.08);
+  --color-line-strong: rgba(7, 16, 51, 0.14);
+
+  /* acao */
+  --color-steel: #2e5bff;
+  --color-steel-600: #1f47d6;
+  --color-steel-50: #eef2ff;
+
+  /* semanticas — painel de compras */
+  --color-danger: #e5484d;        /* atrasado */
+  --color-danger-50: #fdecec;
+  --color-warn: #f5a524;          /* prazo proximo */
+  --color-warn-50: #fdf3e3;
+  --color-success: #2f9e6e;       /* entregue */
+  --color-success-50: #e9f6f0;
+  --color-info: #2e5bff;          /* comprado (= steel) */
+  --color-info-50: #eef2ff;
+
+  /* raios / sombra */
+  --radius-card: 16px;
+  --shadow-card: 0 1px 2px rgba(7, 16, 51, 0.04), 0 12px 28px -16px rgba(7, 16, 51, 0.22);
+  --shadow-pop: 0 2px 6px rgba(7, 16, 51, 0.06), 0 20px 44px -20px rgba(7, 16, 51, 0.28);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* titulos — Montserrat em peso alto */
+.font-display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* numeros tabulares em tabelas e KPIs */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* trilho de scroll discreto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* ---- grainy glassmorphism ---- */
+
+/* fundo marinho: base preta no topo-esquerda, ponto de luz no canto inferior direito */
+.bg-brand-gradient {
+  background:
+    radial-gradient(55% 50% at 92% 104%, rgba(46, 91, 255, 0.24) 0%, rgba(46, 91, 255, 0) 62%),
+    radial-gradient(150% 150% at 90% 100%, #14276a 0%, #0b1740 38%, #05081f 74%, #03061a 100%),
+    var(--color-navy);
+}
+
+/* textura de grao — sobrepor com opacidade baixa */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.82'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3C/filter%3E%3Crect%20width='180'%20height='180'%20filter='url(%23n)'%20opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.16;
+  mix-blend-mode: soft-light;
+}
+
+/* painel de vidro fosco */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 24px 70px -20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
