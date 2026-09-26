@@ -3,6 +3,9 @@
 -- Padrao: nomes minusculos, ASCII, snake_case, tabelas no plural
 -- Dinheiro: numeric(12,2)  |  Percentual: numeric(5,2)
 -- Timestamps: timestamptz
+--
+-- Este arquivo e a BASE inicial. Toda alteracao posterior fica em
+-- supabase/migrations/ (ordem pelo timestamp do nome do arquivo).
 -- ============================================================
 
 -- ------------------------------------------------------------

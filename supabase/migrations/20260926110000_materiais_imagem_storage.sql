@@ -1,6 +1,6 @@
 -- ============================================================
 -- Alumaxi - materiais: coluna de imagem + bucket de Storage
--- Rode uma vez no SQL Editor do Supabase.
+-- Idempotente (if not exists / on conflict / drop policy if exists).
 -- ============================================================
 
 -- 1) coluna da imagem (URL publica do arquivo no Storage)
