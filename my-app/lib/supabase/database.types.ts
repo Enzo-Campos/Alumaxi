@@ -207,6 +207,11 @@ export type Database = {
           cargo: string | null;
           status: Database["public"]["Enums"]["funcionario_status"];
           data_demissao: DateStr | null;
+          cpf: string | null; // so digitos (11)
+          rg: string | null;
+          telefone: string | null; // so digitos: DDD + numero
+          vale_alimentacao: number;
+          vale_alimentacao_por_fora: boolean;
           obs: string | null;
           created_at: Timestamptz;
           updated_at: Timestamptz;
@@ -220,6 +225,11 @@ export type Database = {
           cargo?: string | null;
           status?: Database["public"]["Enums"]["funcionario_status"];
           data_demissao?: DateStr | null;
+          cpf?: string | null;
+          rg?: string | null;
+          telefone?: string | null;
+          vale_alimentacao?: number;
+          vale_alimentacao_por_fora?: boolean;
           obs?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["funcionarios"]["Insert"]>;
