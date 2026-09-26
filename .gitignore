@@ -1,0 +1,5 @@
+# Planilhas de controle interno (salarios, dados pessoais, financeiro).
+# Nunca versionar: o repositorio pode ir para o GitHub.
+*.xlsx
+*.xls
+*.csv
