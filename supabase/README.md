@@ -63,6 +63,10 @@ Conferir com `select * from cron.job;`.
 - Condições de uma dívida (parcela, quantidade, 1º vencimento) são imutáveis; ajuste parcelas direto em `contas_pagar`.
 - Vencimento: data fixa em dia não útil segue `ajuste_nao_util` (boleto posterga, salário antecipa). Feriados vêm de `feriados` (nacionais + Santos/SP; Carnaval e Corpus Christi não contam, são facultativos para o funcionário). Páscoa é calculada (`pascoa()`), não precisa cadastrar ano a ano.
 
+**No app:** página `/financeiro` (`my-app/app/(app)/financeiro/`), consultas em
+`my-app/lib/financeiro-data.ts`, helpers puros em `my-app/lib/financeiro.ts`,
+componentes em `my-app/components/financeiro/`. Salário e VA são editados em `/funcionarios`.
+
 **Views para o front:**
 - `vw_contas_pagar` — contas com nomes resolvidos, `situacao` (pago, cancelado, vencido, vence_hoje, vence_em_breve, a_vencer), `dias_para_vencer`, `origem`.
 - `vw_contas_a_lancar` — contas variáveis pendentes de lançamento, com `vencimento_previsto` e `ultimo_valor` (referência).
@@ -74,5 +78,5 @@ Conferir com `select * from cron.job;`.
 - Parcela da Kombi está como recorrência fixa sem fim: não se sabe o número de parcelas. Quando souber, encerrar a recorrência (`competencia_fim`) e cadastrar em `dividas`.
 - Água do Galpão e do Terreno não foram cadastradas (sem valor na planilha).
 - Feriados municipais de Santos (26/01 e 08/09) foram cadastrados de memória — confirmar com o contador.
-- Tipos TypeScript das tabelas do financeiro ainda não estão em `database.types.ts` (só `funcionarios` foi atualizado). A página `/financeiro` ainda é "em construção".
+- `folha_regras` e `feriados` só são editáveis por SQL (não há tela). Mudam raramente.
 - RLS: todo usuário autenticado vê tudo, inclusive CPF/RG e salários. Se entrarem usuários não administradores, criar papéis e policies por papel.
