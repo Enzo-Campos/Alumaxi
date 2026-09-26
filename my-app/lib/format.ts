@@ -20,10 +20,21 @@ export function brlCompact(n: number): string {
   return brlCompactFmt.format(n);
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Converte ISO em Date. Datas puras ("2026-10-20", colunas `date` do banco)
+ * viram meio-dia LOCAL: `new Date("2026-10-20")` seria meia-noite UTC, que no
+ * fuso do Brasil ainda e 19/10 — o dia mostrado sairia errado.
+ */
+function toDate(iso: string): Date {
+  return DATE_ONLY.test(iso) ? new Date(`${iso}T12:00:00`) : new Date(iso);
+}
+
 /** 08/09/2026 */
 export function dateBR(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("pt-BR", {
+  return toDate(iso).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -33,7 +44,7 @@ export function dateBR(iso: string | null): string {
 /** 08/set */
 export function dateShortBR(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("pt-BR", {
+  return toDate(iso).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
   });
