@@ -8,6 +8,8 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type ObraEtapaUpdate = Database["public"]["Tables"]["obra_etapas"]["Update"];
 type ObraUpdate = Database["public"]["Tables"]["obras"]["Update"];
+type SaidaInsert = Database["public"]["Tables"]["saidas_financeiras"]["Insert"];
+type SaidaCategoria = Database["public"]["Enums"]["saida_categoria"];
 type MaterialUnidade = Database["public"]["Enums"]["material_unidade"];
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
@@ -130,47 +132,55 @@ export type EditarObraInput = {
   descricao: string | null;
 };
 
+function validarObra(input: EditarObraInput): string | null {
+  if (!input.nome.trim()) return "Informe o nome da obra.";
+  if (!OBRA_STATUS_VALIDOS.includes(input.status)) return "Status invalido.";
+  if (!(input.orcamento_material >= 0)) return "Orcamento de material invalido.";
+  if (!(input.percentual_receita >= 0 && input.percentual_receita <= 100))
+    return "Percentual de receita deve estar entre 0 e 100.";
+  return null;
+}
+
+/** Resolve o cliente pelo nome: usa o existente ou cria um minimo. */
+async function resolverCliente(
+  supabase: Supa,
+  nomeCru: string | null,
+): Promise<{ id_cliente: number | null; error?: string }> {
+  const nome = nomeCru?.trim() || "";
+  if (!nome) return { id_cliente: null };
+
+  const { data: existente } = await supabase
+    .from("clientes")
+    .select("id")
+    .ilike("nome", nome)
+    .limit(1)
+    .maybeSingle();
+  if (existente) return { id_cliente: existente.id };
+
+  const { data: criado, error } = await supabase
+    .from("clientes")
+    .insert({ nome })
+    .select("id")
+    .single();
+  if (error || !criado) return { id_cliente: null, error: error?.message ?? "Falha ao criar o cliente." };
+  return { id_cliente: criado.id };
+}
+
 /** Edita os campos da obra (inclui orcamento de material e % de receita). */
 export async function updateObra(
   id: number,
   input: EditarObraInput,
 ): Promise<{ error?: string; ok?: boolean }> {
-  const nome = input.nome.trim();
-  if (!nome) return { error: "Informe o nome da obra." };
-  if (!OBRA_STATUS_VALIDOS.includes(input.status)) return { error: "Status invalido." };
-  if (!(input.orcamento_material >= 0)) return { error: "Orcamento de material invalido." };
-  if (!(input.percentual_receita >= 0 && input.percentual_receita <= 100))
-    return { error: "Percentual de receita deve estar entre 0 e 100." };
-
+  const erro = validarObra(input);
+  if (erro) return { error: erro };
   if (!supabaseConfigured) return { ok: true }; // modo demonstracao: sem persistencia
 
   const supabase = await createClient();
-
-  // resolve o cliente pelo nome (usa existente ou cria um minimo)
-  let id_cliente: number | null = null;
-  const nomeCliente = input.cliente?.trim() || "";
-  if (nomeCliente) {
-    const { data: existente } = await supabase
-      .from("clientes")
-      .select("id")
-      .ilike("nome", nomeCliente)
-      .limit(1)
-      .maybeSingle();
-    if (existente) {
-      id_cliente = existente.id;
-    } else {
-      const { data: criado, error: cliErr } = await supabase
-        .from("clientes")
-        .insert({ nome: nomeCliente })
-        .select("id")
-        .single();
-      if (cliErr || !criado) return { error: cliErr?.message ?? "Falha ao criar o cliente." };
-      id_cliente = criado.id;
-    }
-  }
+  const { id_cliente, error: cliErr } = await resolverCliente(supabase, input.cliente);
+  if (cliErr) return { error: cliErr };
 
   const patch: ObraUpdate = {
-    nome,
+    nome: input.nome.trim(),
     id_cliente,
     status: input.status,
     orcamento_material: input.orcamento_material,
@@ -188,11 +198,104 @@ export async function updateObra(
   return { ok: true };
 }
 
+export type CriarObraInput = EditarObraInput & { etapaIds: number[] };
+
+/** Cria a obra e vincula as etapas escolhidas (todas em `pendente`). */
+export async function createObra(
+  input: CriarObraInput,
+): Promise<{ error?: string; id?: number }> {
+  const erro = validarObra(input);
+  if (erro) return { error: erro };
+  if (!supabaseConfigured) return { id: 1 }; // modo demonstracao: cai na obra mock
+
+  const supabase = await createClient();
+  const { id_cliente, error: cliErr } = await resolverCliente(supabase, input.cliente);
+  if (cliErr) return { error: cliErr };
+
+  const { data: criada, error } = await supabase
+    .from("obras")
+    .insert({
+      nome: input.nome.trim(),
+      id_cliente,
+      status: input.status,
+      orcamento_material: input.orcamento_material,
+      percentual_receita: input.percentual_receita,
+      data_inicio: input.data_inicio || null,
+      data_prevista_termino: input.data_prevista_termino || null,
+      descricao: input.descricao?.trim() || null,
+    })
+    .select("id")
+    .single();
+  if (error || !criada) return { error: error?.message ?? "Falha ao criar a obra." };
+
+  const etapaIds = [...new Set(input.etapaIds)].filter((n) => Number.isFinite(n));
+  if (etapaIds.length) {
+    const { error: etErr } = await supabase.from("obra_etapas").insert(
+      etapaIds.map((id_etapa) => ({
+        id_obra: criada.id,
+        id_etapa,
+        status: "pendente" as const,
+      })),
+    );
+    if (etErr) {
+      return {
+        id: criada.id,
+        error: `Obra criada, mas falha ao vincular etapas: ${etErr.message}`,
+      };
+    }
+  }
+
+  revalidatePath("/obras");
+  revalidatePath(`/obras/${criada.id}`);
+  return { id: criada.id };
+}
+
+const SAIDA_CATEGORIAS: SaidaCategoria[] = ["compra_material", "retirada_lucro"];
+
+export type SaidaInput = {
+  valor: number;
+  categoria: SaidaCategoria;
+  descricao: string | null;
+  data: string | null; // YYYY-MM-DD (opcional; default = agora)
+};
+
+/**
+ * Registra uma saida financeira da obra. Toda saida debita do valor a
+ * receber (a view vw_obras_financeiro recalcula sozinha).
+ */
+export async function createSaida(
+  obraId: number,
+  input: SaidaInput,
+): Promise<{ error?: string; ok?: boolean }> {
+  if (!obraId) return { error: "Obra invalida." };
+  if (!(input.valor > 0)) return { error: "Informe um valor maior que zero." };
+  if (!SAIDA_CATEGORIAS.includes(input.categoria)) return { error: "Categoria invalida." };
+
+  if (!supabaseConfigured) return { ok: true }; // modo demonstracao: sem persistencia
+
+  const supabase = await createClient();
+  const row: SaidaInsert = {
+    id_obra: obraId,
+    valor_retirado: input.valor,
+    categoria: input.categoria,
+    descricao: input.descricao?.trim() || null,
+  };
+  if (input.data) row.created_at = new Date(`${input.data}T12:00:00`).toISOString();
+
+  const { error } = await supabase.from("saidas_financeiras").insert(row);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/obras/${obraId}`);
+  revalidatePath("/obras");
+  return { ok: true };
+}
+
 export type NovaSolicitacaoInput = {
   id_obra: number;
   id_etapa: number;
-  material: string;
-  unidade: MaterialUnidade;
+  id_material: number | null; // preenchido quando escolhe um material cadastrado
+  material: string; // nome — usado para criar quando id_material for null
+  unidade: MaterialUnidade; // usada ao criar material novo
   quantidade: number;
   prazo_entrega: string | null;
   especificacoes: string | null;
@@ -202,38 +305,43 @@ export type NovaSolicitacaoInput = {
 /**
  * Registra uma falta de material (status `a_comprar`). Identifica obra + etapa
  * pelo input e reavalia a etapa (fica `pausada` -> aviso vermelho na obra).
+ * O material vem do select (id_material) ou e criado a partir do nome/unidade.
  */
 export async function createFaltaMaterial(
   input: NovaSolicitacaoInput,
 ): Promise<{ error?: string; ok?: boolean }> {
   const material = input.material.trim();
   if (!input.id_obra || !input.id_etapa) return { error: "Selecione a obra e a etapa." };
-  if (!material) return { error: "Informe o material." };
+  if (!input.id_material && !material) return { error: "Selecione ou informe o material." };
   if (!(input.quantidade > 0)) return { error: "Quantidade deve ser maior que zero." };
 
   if (!supabaseConfigured) return { ok: true }; // modo demonstracao: sem persistencia
 
   const supabase = await createClient();
 
-  // resolve o material: usa o existente (case-insensitive) ou cria um novo
+  // material cadastrado (id) ou resolve pelo nome / cria um novo
   let id_material: number;
-  const { data: existente } = await supabase
-    .from("materiais")
-    .select("id")
-    .ilike("nome", material)
-    .limit(1)
-    .maybeSingle();
-
-  if (existente) {
-    id_material = existente.id;
+  if (input.id_material) {
+    id_material = input.id_material;
   } else {
-    const { data: criado, error: matErr } = await supabase
+    const { data: existente } = await supabase
       .from("materiais")
-      .insert({ nome: material, unidade: input.unidade })
       .select("id")
-      .single();
-    if (matErr || !criado) return { error: matErr?.message ?? "Falha ao criar o material." };
-    id_material = criado.id;
+      .ilike("nome", material)
+      .limit(1)
+      .maybeSingle();
+
+    if (existente) {
+      id_material = existente.id;
+    } else {
+      const { data: criado, error: matErr } = await supabase
+        .from("materiais")
+        .insert({ nome: material, unidade: input.unidade })
+        .select("id")
+        .single();
+      if (matErr || !criado) return { error: matErr?.message ?? "Falha ao criar o material." };
+      id_material = criado.id;
+    }
   }
 
   const { error: insErr } = await supabase.from("falta_materiais").insert({

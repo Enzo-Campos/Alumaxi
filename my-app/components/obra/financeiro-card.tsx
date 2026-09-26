@@ -66,12 +66,13 @@ export function FinanceiroCard({
     <Card
       title="Financeiro"
       action={
-        <button
-          type="button"
+        <Link
+          href="?saida=1"
+          scroll={false}
           className="rounded-lg bg-steel px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-steel-600"
         >
           Registrar saida
-        </button>
+        </Link>
       }
     >
       <div className="divide-y divide-line">

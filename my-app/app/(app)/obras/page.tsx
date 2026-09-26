@@ -1,14 +1,20 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Card } from "@/components/card";
 import { Pill, OBRA_STATUS } from "@/components/status-pill";
 import { brl, dateBR } from "@/lib/format";
-import { getObrasResumo } from "@/lib/obra";
+import { getObrasResumo, getClientes, getEtapasAtivas } from "@/lib/obra";
+import { NovaObraModal } from "@/components/obra/nova-obra";
 
 export const dynamic = "force-dynamic";
 
 export default async function ObrasPage() {
-  const obras = await getObrasResumo();
+  const [obras, clientes, etapas] = await Promise.all([
+    getObrasResumo(),
+    getClientes(),
+    getEtapasAtivas(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -22,12 +28,13 @@ export default async function ObrasPage() {
             {obras.length === 1 ? "" : "s"}
           </p>
         </div>
-        <button
-          type="button"
-          className="rounded-lg bg-steel px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-steel-600"
+        <Link
+          href="?nova=1"
+          scroll={false}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-steel px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-steel-600"
         >
-          Nova obra
-        </button>
+          <Plus size={15} /> Nova obra
+        </Link>
       </header>
 
       <Card bodyClassName="">
@@ -77,6 +84,10 @@ export default async function ObrasPage() {
           </ul>
         )}
       </Card>
+
+      <Suspense fallback={null}>
+        <NovaObraModal clientes={clientes} etapas={etapas} />
+      </Suspense>
     </div>
   );
 }

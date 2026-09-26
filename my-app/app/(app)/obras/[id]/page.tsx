@@ -10,6 +10,7 @@ import { EtapasAndamento } from "@/components/obra/etapas-andamento";
 import { FinanceiroCard } from "@/components/obra/financeiro-card";
 import { FaltasTabela } from "@/components/obra/faltas-tabela";
 import { EditarObraModal } from "@/components/obra/editar-obra";
+import { NovaSaidaModal } from "@/components/obra/nova-saida";
 
 export default async function ObraPage(props: PageProps<"/obras/[id]">) {
   const { id } = await props.params;
@@ -59,12 +60,13 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
             >
               Editar obra
             </Link>
-            <button
-              type="button"
+            <Link
+              href="?saida=1"
+              scroll={false}
               className="rounded-lg bg-steel px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-steel-600"
             >
               Registrar saida
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -134,6 +136,10 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
 
       {/* material pendente */}
       <FaltasTabela faltas={obra.faltas} />
+
+      <Suspense fallback={null}>
+        <NovaSaidaModal obraId={obra.id} />
+      </Suspense>
 
       <Suspense fallback={null}>
         <EditarObraModal

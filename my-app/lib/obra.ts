@@ -319,6 +319,33 @@ export async function getClientes(): Promise<{ id: number; nome: string }[]> {
   return data ?? [];
 }
 
+export async function getEtapasAtivas(): Promise<
+  { id: number; nome: string; ordem: number }[]
+> {
+  if (!supabaseConfigured) {
+    return [
+      { id: 1, nome: "Contra marco dos tipos", ordem: 10 },
+      { id: 2, nome: "Corte do aluminio", ordem: 20 },
+      { id: 3, nome: "Usinagem", ordem: 30 },
+      { id: 4, nome: "Montagem", ordem: 40 },
+      { id: 5, nome: "Instalacao de vidros", ordem: 50 },
+      { id: 6, nome: "Furacao de sacada", ordem: 60 },
+      { id: 7, nome: "Instalacao de castilhos", ordem: 70 },
+      { id: 8, nome: "Lazer", ordem: 80 },
+      { id: 9, nome: "Corrimao", ordem: 90 },
+      { id: 10, nome: "Terreo", ordem: 100 },
+      { id: 11, nome: "Portao", ordem: 110 },
+    ];
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("etapas")
+    .select("id,nome,ordem")
+    .eq("ativa", true)
+    .order("ordem");
+  return data ?? [];
+}
+
 /* ---- derivados ---- */
 
 export function progressoEtapas(etapas: ObraEtapa[]): {

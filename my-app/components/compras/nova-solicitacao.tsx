@@ -30,12 +30,15 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
 
   const [idObra, setIdObra] = useState<number | "">("");
   const [idEtapa, setIdEtapa] = useState<number | "">("");
-  const [material, setMaterial] = useState("");
+  const [materialSel, setMaterialSel] = useState<string>(""); // "" | "<id>" | "__novo__"
+  const [materialNovo, setMaterialNovo] = useState("");
   const [unidade, setUnidade] = useState<NovaSolicitacaoInput["unidade"]>("un");
   const [quantidade, setQuantidade] = useState("");
   const [prazo, setPrazo] = useState("");
   const [espec, setEspec] = useState("");
   const [obs, setObs] = useState("");
+
+  const isNovoMaterial = materialSel === "__novo__";
 
   const etapasDaObra = useMemo(
     () => data.obraEtapas.filter((oe) => oe.id_obra === idObra),
@@ -45,7 +48,8 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
   function reset() {
     setIdObra("");
     setIdEtapa("");
-    setMaterial("");
+    setMaterialSel("");
+    setMaterialNovo("");
     setUnidade("un");
     setQuantidade("");
     setPrazo("");
@@ -53,13 +57,13 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
     setObs("");
   }
 
-  function onMaterial(v: string) {
-    setMaterial(v);
-    const known = data.materiais.find(
-      (m) => m.nome.toLowerCase() === v.trim().toLowerCase(),
-    );
-    if (known && (UNIDADES as string[]).includes(known.unidade)) {
-      setUnidade(known.unidade as NovaSolicitacaoInput["unidade"]);
+  function onMaterialSel(v: string) {
+    setMaterialSel(v);
+    if (v && v !== "__novo__") {
+      const m = data.materiais.find((x) => String(x.id) === v);
+      if (m && (UNIDADES as string[]).includes(m.unidade)) {
+        setUnidade(m.unidade as NovaSolicitacaoInput["unidade"]);
+      }
     }
   }
 
@@ -71,6 +75,14 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
       setError("Selecione a obra e a etapa.");
       return;
     }
+    if (materialSel === "") {
+      setError("Selecione o material.");
+      return;
+    }
+    if (isNovoMaterial && !materialNovo.trim()) {
+      setError("Informe o nome do novo material.");
+      return;
+    }
     const qtd = Number(quantidade.replace(",", "."));
     if (!(qtd > 0)) {
       setError("Quantidade invalida.");
@@ -80,7 +92,8 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
       const r = await createFaltaMaterial({
         id_obra: Number(idObra),
         id_etapa: Number(idEtapa),
-        material,
+        id_material: isNovoMaterial ? null : Number(materialSel),
+        material: isNovoMaterial ? materialNovo.trim() : "",
         unidade,
         quantidade: qtd,
         prazo_entrega: prazo || null,
@@ -179,21 +192,37 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
 
         <div className="sm:col-span-2">
           <label className={labelCls}>Material</label>
-          <input
+          <select
             className={field}
-            list="materiais-lista"
-            value={material}
-            onChange={(e) => onMaterial(e.target.value)}
-            placeholder="Digite ou escolha da lista"
-          />
-          <datalist id="materiais-lista">
+            value={materialSel}
+            onChange={(e) => onMaterialSel(e.target.value)}
+          >
+            <option value="">Selecione…</option>
             {data.materiais.map((m) => (
-              <option key={m.id} value={m.nome} />
+              <option key={m.id} value={m.id}>
+                {m.nome}
+              </option>
             ))}
-          </datalist>
+            <option value="__novo__">+ Cadastrar novo material</option>
+          </select>
         </div>
 
-        <div className="grid grid-cols-[1fr_110px] gap-3">
+        {isNovoMaterial && (
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Nome do novo material</label>
+            <input
+              className={field}
+              value={materialNovo}
+              onChange={(e) => setMaterialNovo(e.target.value)}
+              placeholder="Ex.: Fita dupla-face estrutural"
+            />
+            <p className="mt-1 text-[11px] text-faint">
+              Sera cadastrado em Materiais automaticamente.
+            </p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-[1fr_120px] gap-3">
           <div>
             <label className={labelCls}>Quantidade</label>
             <input
@@ -207,8 +236,10 @@ export function NovaSolicitacao({ data }: { data: NovaSolicitacaoData }) {
           <div>
             <label className={labelCls}>Unidade</label>
             <select
-              className={field}
+              className={`${field} disabled:bg-surface disabled:text-muted`}
               value={unidade}
+              disabled={!isNovoMaterial}
+              title={isNovoMaterial ? undefined : "Definida pelo material cadastrado"}
               onChange={(e) =>
                 setUnidade(e.target.value as NovaSolicitacaoInput["unidade"])
               }

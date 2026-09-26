@@ -47,6 +47,7 @@ export type Database = {
           id: number;
           nome: string;
           unidade: Database["public"]["Enums"]["material_unidade"];
+          imagem_url: string | null;
           ativo: boolean;
           created_at: Timestamptz;
         };
@@ -54,6 +55,7 @@ export type Database = {
           id?: never;
           nome: string;
           unidade?: Database["public"]["Enums"]["material_unidade"];
+          imagem_url?: string | null;
           ativo?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["materiais"]["Insert"]>;

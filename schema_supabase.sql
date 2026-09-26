@@ -181,6 +181,7 @@ create table materiais (
     id         bigint generated always as identity primary key,
     nome       varchar(150) not null,
     unidade    material_unidade not null default 'un',
+    imagem_url text,
     ativo      boolean not null default true,
     created_at timestamptz not null default now()
 );
