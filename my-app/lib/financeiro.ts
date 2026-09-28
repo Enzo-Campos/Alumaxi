@@ -153,6 +153,50 @@ export function fimDoMes(mes: string): string {
 }
 
 /* ------------------------------------------------------------------ */
+/* dados dos graficos (usados na Visao geral e no Painel)              */
+/* ------------------------------------------------------------------ */
+
+export type SerieMensal = { id: number; nome: string; cor: string };
+export type CategoriaMes = { id: number; nome: string; grupo: string; total: number; pago: number; aberto: number };
+
+/** Colunas empilhadas por grupo dos `n` meses ate `mesFim`. */
+export function montarMensal(mensal: FinanceiroMensal[], grupos: Opcoes["grupos"], mesFim: string, n: number) {
+  const meses = Array.from({ length: n }, (_, i) => somaMes(mesFim, i - (n - 1)));
+  const valores: Record<string, Record<number, number>> = {};
+  const presentes = new Set<number>();
+  for (const r of mensal) {
+    const m = r.competencia.slice(0, 7);
+    valores[m] ??= {};
+    valores[m][r.id_grupo] = (valores[m][r.id_grupo] ?? 0) + r.total;
+    presentes.add(r.id_grupo);
+  }
+  const series: SerieMensal[] = grupos
+    .filter((g) => presentes.has(g.id))
+    .map((g) => ({ id: g.id, nome: g.nome, cor: corDoGrupo(grupos, g.id) }));
+  return { meses, series, valores };
+}
+
+/** Total / pago / em aberto do mes por categoria (canceladas ja devem vir fora). */
+export function composicaoPorCategoria(validas: ContaView[]): CategoriaMes[] {
+  const por = new Map<number, CategoriaMes>();
+  for (const c of validas) {
+    const it = por.get(c.id_categoria) ?? {
+      id: c.id_categoria,
+      nome: c.categoria,
+      grupo: c.grupo,
+      total: 0,
+      pago: 0,
+      aberto: 0,
+    };
+    it.total += c.valor_efetivo;
+    if (c.status === "pago") it.pago += c.valor_efetivo;
+    else it.aberto += c.valor;
+    por.set(c.id_categoria, it);
+  }
+  return [...por.values()];
+}
+
+/* ------------------------------------------------------------------ */
 /* vinculo da conta (a quem/ao que se refere) em texto                 */
 /* ------------------------------------------------------------------ */
 

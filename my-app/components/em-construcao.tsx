@@ -32,10 +32,10 @@ export function EmConstrucao({
             disponivel em breve.
           </p>
           <Link
-            href="/obras"
+            href="/painel"
             className="mt-6 rounded-lg bg-steel px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-steel-600"
           >
-            Voltar para Obras
+            Voltar para o Painel
           </Link>
         </div>
       </Card>

@@ -16,7 +16,7 @@ const inputCls =
 
 function LoginForm() {
   const params = useSearchParams();
-  const next = params.get("next") ?? "/obras";
+  const next = params.get("next") ?? "/painel";
 
   const [state, formAction, pending] = useActionState<LoginState, FormData>(
     signIn,

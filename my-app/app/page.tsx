@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  // A gestao de obra e a tela central do sistema.
-  redirect("/obras");
+  // O Painel (visao geral de todas as areas) e a tela inicial.
+  redirect("/painel");
 }

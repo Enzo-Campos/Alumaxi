@@ -13,7 +13,7 @@ export async function signIn(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const nextRaw = String(formData.get("next") ?? "");
-  const next = nextRaw.startsWith("/") ? nextRaw : "/obras";
+  const next = nextRaw.startsWith("/") ? nextRaw : "/painel";
 
   if (!email || !password) return { error: "Informe e-mail e senha." };
 

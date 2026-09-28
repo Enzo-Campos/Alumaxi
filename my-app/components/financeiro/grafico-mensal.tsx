@@ -58,7 +58,7 @@ export function GraficoMensal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setLargura(Math.max(320, e.contentRect.width)));
+    const ro = new ResizeObserver(([e]) => setLargura(Math.max(260, e.contentRect.width)));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);

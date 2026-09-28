@@ -11,9 +11,9 @@ import { Pill } from "@/components/status-pill";
 import { brl, brlCompact, dateBR, pct } from "@/lib/format";
 import {
   SITUACAO,
-  corDoGrupo,
+  composicaoPorCategoria,
   mesCurto,
-  somaMes,
+  montarMensal,
   urlCom,
   vinculoDe,
   type ContaALancar,
@@ -24,8 +24,8 @@ import {
 import { getContas, getDividas, getMensal } from "@/lib/financeiro-data";
 import { ContaAcoes } from "./conta-acoes";
 import { ContasALancar } from "./contas-a-lancar";
-import { GraficoMensal, type Serie } from "./grafico-mensal";
-import { GraficoCategorias, type ItemCategoria } from "./grafico-categorias";
+import { GraficoMensal } from "./grafico-mensal";
+import { GraficoCategorias } from "./grafico-categorias";
 
 const MESES_GRAFICO = 6;
 
@@ -63,36 +63,9 @@ export async function AbaVisao({
   const totalVencido = vencidas.reduce((s, c) => s + c.valor, 0);
   const aLancarAtrasadas = aLancar.filter((a) => a.situacao === "vencido" || a.situacao === "vence_hoje");
 
-  /* ---- series do grafico mensal ---- */
-  const meses = Array.from({ length: MESES_GRAFICO }, (_, i) => somaMes(mes, i - (MESES_GRAFICO - 1)));
-  const valores: Record<string, Record<number, number>> = {};
-  const gruposPresentes = new Set<number>();
-  for (const r of mensal) {
-    const m = r.competencia.slice(0, 7);
-    valores[m] ??= {};
-    valores[m][r.id_grupo] = (valores[m][r.id_grupo] ?? 0) + r.total;
-    gruposPresentes.add(r.id_grupo);
-  }
-  const series: Serie[] = opcoes.grupos
-    .filter((g) => gruposPresentes.has(g.id))
-    .map((g) => ({ id: g.id, nome: g.nome, cor: corDoGrupo(opcoes.grupos, g.id) }));
-
-  /* ---- composicao do mes por categoria ---- */
-  const porCategoria = new Map<number, ItemCategoria>();
-  for (const c of validas) {
-    const it = porCategoria.get(c.id_categoria) ?? {
-      id: c.id_categoria,
-      nome: c.categoria,
-      grupo: c.grupo,
-      total: 0,
-      pago: 0,
-      aberto: 0,
-    };
-    it.total += c.valor_efetivo;
-    if (c.status === "pago") it.pago += c.valor_efetivo;
-    else it.aberto += c.valor;
-    porCategoria.set(c.id_categoria, it);
-  }
+  /* ---- graficos ---- */
+  const { meses, series, valores } = montarMensal(mensal, opcoes.grupos, mes, MESES_GRAFICO);
+  const categorias = composicaoPorCategoria(validas);
 
   const dividasAtivas = dividas.filter((d) => !d.quitada);
 
@@ -182,7 +155,7 @@ export async function AbaVisao({
           <GraficoMensal meses={meses} series={series} valores={valores} destaque={mes} />
         </Card>
         <Card title={`Composicao de ${mesCurto(mes)}`}>
-          <GraficoCategorias itens={[...porCategoria.values()]} />
+          <GraficoCategorias itens={categorias} />
         </Card>
       </div>
 
