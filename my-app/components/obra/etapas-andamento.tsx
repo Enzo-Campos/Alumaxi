@@ -91,8 +91,9 @@ export function EtapasAndamento({
                 <Marker status={e.status} faltaMaterial={qtdPendente > 0} />
               </div>
 
-              <div className="flex-1 pb-3">
-                <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1 pb-3">
+                {/* celular: status abaixo do nome; a partir de sm, ao lado */}
+                <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
                   <div className="min-w-0">
                     <p
                       className={`text-[13.5px] font-medium ${

@@ -50,7 +50,54 @@ export default async function ComprasPage() {
       </div>
 
       <Card title="Precisa comprar" bodyClassName="">
-        <div className="overflow-x-auto">
+        {/* mobile: uma solicitacao por card */}
+        <ul className="divide-y divide-line md:hidden">
+          {itens.map((i) => {
+            const u = urgenciaDe(i);
+            const bar =
+              u === "atrasado" ? "bg-danger" : u === "proximo" ? "bg-warn" : "bg-transparent";
+            const st = FALTA_STATUS[i.status];
+            return (
+              <li key={i.id} className="relative px-4 py-3.5">
+                <span className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-r ${bar}`} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-medium text-ink">{i.material}</p>
+                    {i.especificacoes && (
+                      <p className="mt-0.5 text-[11.5px] text-muted">{i.especificacoes}</p>
+                    )}
+                  </div>
+                  <p className="tnum shrink-0 whitespace-nowrap text-[13px] font-semibold text-ink">
+                    {i.quantidade} {i.unidade}
+                  </p>
+                </div>
+                <p className="mt-1 text-[12px] text-muted">
+                  {i.obra}
+                  <span className="text-faint"> · {i.etapa}</span>
+                </p>
+                <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Pill tone={st.tone}>{st.label}</Pill>
+                    <span className="tnum text-[12px] text-ink">{dateBR(i.prazo_entrega)}</span>
+                    {u === "atrasado" && (
+                      <span className="text-[11px] font-semibold text-danger">
+                        Atrasado {i.dias_de_atraso}d
+                      </span>
+                    )}
+                    {u === "proximo" && (
+                      <span className="text-[11px] font-semibold text-[#B9761A]">
+                        Vence em {Math.abs(i.dias_de_atraso ?? 0)}d
+                      </span>
+                    )}
+                  </div>
+                  <FaltaAcoes id={i.id} status={i.status} />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[840px] text-left">
             <thead>
               <tr className="border-b border-line text-[10.5px] uppercase tracking-[0.12em] text-faint">

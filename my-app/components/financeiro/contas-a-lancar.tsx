@@ -58,9 +58,10 @@ function Linha({ item }: { item: ContaALancar }) {
         <Pill tone={sit.tone} dot>
           {item.situacao === "a_vencer" ? `vence ${dateBR(item.vencimento_previsto)}` : sit.label}
         </Pill>
-        <div className="flex flex-wrap items-center gap-2">
+        {/* celular: valor, data e acoes empilhados; a partir de sm, em linha */}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
           <input
-            className={`${field} tnum w-[110px]`}
+            className={`${field} tnum w-full sm:w-[110px]`}
             inputMode="decimal"
             placeholder="R$ 0,00"
             value={valor}
@@ -70,11 +71,12 @@ function Linha({ item }: { item: ContaALancar }) {
           />
           <input
             type="date"
-            className={`${field} w-[140px]`}
+            className={`${field} w-full sm:w-[140px]`}
             value={venc}
             onChange={(e) => setVenc(e.target.value)}
             aria-label="Vencimento"
           />
+          <div className="flex items-center justify-between gap-2 sm:contents">
           <label className="flex items-center gap-1.5 text-[12px] text-muted">
             <input
               type="checkbox"
@@ -92,6 +94,7 @@ function Linha({ item }: { item: ContaALancar }) {
           >
             {pending ? "…" : "Lancar"}
           </button>
+          </div>
         </div>
       </div>
       {erro && <p className="mt-1.5 text-[11.5px] font-medium text-danger">{erro}</p>}

@@ -53,7 +53,78 @@ export async function AbaContas({ mes, params, opcoes }: { mes: string; params: 
             Nenhuma conta encontrada para este mes{params.sit || params.grupo || params.q ? " com esses filtros" : ""}.
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* mobile: uma conta por card */}
+          <ul className="divide-y divide-line md:hidden">
+            {contas.map((c) => {
+              const sit = SITUACAO[c.situacao];
+              const barra =
+                c.situacao === "vencido" || c.situacao === "vence_hoje"
+                  ? "bg-danger"
+                  : c.situacao === "vence_em_breve"
+                    ? "bg-warn"
+                    : "bg-transparent";
+              const vinc = vinculoDe(c);
+              const difPago = c.status === "pago" && c.valor_pago != null && c.valor_pago !== c.valor;
+              return (
+                <li key={c.id} className={`relative px-4 py-3.5 ${c.status === "cancelado" ? "opacity-50" : ""}`}>
+                  <span className={`absolute bottom-2 left-0 top-2 w-[3px] rounded-r ${barra}`} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium text-ink">
+                        {c.descricao}
+                        {c.por_fora && (
+                          <span className="ml-1.5 rounded bg-navy/[0.06] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted">
+                            por fora
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 text-[11.5px] text-muted">
+                        {[vinc, c.origem !== "avulsa" ? ORIGEM_LABEL[c.origem] : null].filter(Boolean).join(" · ") ||
+                          "Avulsa"}
+                      </p>
+                    </div>
+                    <div className="tnum shrink-0 text-right">
+                      <p className="text-[14px] font-semibold text-ink">{brl(c.valor_efetivo)}</p>
+                      {difPago && <p className="text-[11px] text-faint line-through">{brl(c.valor)}</p>}
+                    </div>
+                  </div>
+                  <p className="mt-1 flex items-center gap-1.5 text-[12px] text-muted">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-[2px]"
+                      style={{ background: corDoGrupo(opcoes.grupos, c.id_grupo) }}
+                    />
+                    {c.categoria}
+                    <span className="text-faint">· {c.grupo}</span>
+                  </p>
+                  <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Pill tone={sit.tone}>{sit.label}</Pill>
+                      <span className="tnum text-[12px] text-ink">vence {dateBR(c.vencimento)}</span>
+                      {c.status === "pago" && c.data_pagamento && (
+                        <span className="text-[11px] text-success">pago {dateBR(c.data_pagamento)}</span>
+                      )}
+                    </div>
+                    <ContaAcoes id={c.id} status={c.status} />
+                  </div>
+                </li>
+              );
+            })}
+            <li className="px-4 py-3 text-[12.5px]">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-muted">
+                  {validas.length} conta(s){contas.length !== validas.length && ` · ${contas.length - validas.length} cancelada(s)`}
+                </span>
+                <span className="tnum font-bold text-ink">{brl(total)}</span>
+              </div>
+              <p className="mt-1 text-right text-[12px] text-muted">
+                <span className="text-success">pago {brl(pago)}</span> ·{" "}
+                <span className="text-ink">em aberto {brl(aberto)}</span>
+              </p>
+            </li>
+          </ul>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[860px] text-left">
               <thead>
                 <tr className="border-b border-line text-[10.5px] uppercase tracking-[0.12em] text-faint">
@@ -137,6 +208,7 @@ export async function AbaContas({ mes, params, opcoes }: { mes: string; params: 
               </tfoot>
             </table>
           </div>
+          </>
         )}
       </Card>
     </div>

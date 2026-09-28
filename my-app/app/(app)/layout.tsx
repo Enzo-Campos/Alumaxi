@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { Sidebar, type SidebarUser } from "@/components/sidebar";
-import { Logo } from "@/components/logo";
+import { MobileNav, Sidebar, type SidebarUser } from "@/components/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/env";
 
@@ -44,10 +43,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 
       <Sidebar user={user} />
 
-      {/* topo mobile (sidebar fica oculta abaixo de lg) */}
-      <header className="flex h-14 items-center px-5 lg:hidden">
-        <Logo variant="full" className="h-7 w-auto" />
-      </header>
+      {/* topo + gaveta mobile (sidebar fica oculta abaixo de lg) */}
+      <MobileNav user={user} />
 
       <div className="lg:pl-60">
         {/* parte clara do app como painel arredondado sobre o marinho */}

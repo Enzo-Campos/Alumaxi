@@ -32,7 +32,7 @@ export function EtapaStatusSelect({
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="shrink-0 text-right">
+    <div className="shrink-0 sm:text-right">
       <div className="relative inline-flex items-center">
         <select
           aria-label="Status da etapa"

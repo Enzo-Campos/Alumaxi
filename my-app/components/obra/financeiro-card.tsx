@@ -21,8 +21,8 @@ function Row({
   editable?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <span className="flex items-center gap-1.5 text-[13px] text-muted">
+    <div className="flex items-center justify-between gap-3 py-2">
+      <span className="flex min-w-0 items-center gap-1.5 text-[13px] text-muted">
         {op && <span className="inline-block w-3 text-center text-faint">{op}</span>}
         {label}
         {editable && (
@@ -37,7 +37,7 @@ function Row({
         )}
       </span>
       <span
-        className={`tnum ${strong ? "text-[15px] font-bold" : "text-[13.5px] font-medium"} ${
+        className={`tnum shrink-0 whitespace-nowrap ${strong ? "text-[15px] font-bold" : "text-[13.5px] font-medium"} ${
           tone === "success"
             ? "text-success"
             : tone === "danger"
@@ -124,7 +124,7 @@ export function FinanceiroCard({
                   </Pill>
                 </p>
               </div>
-              <span className="tnum text-[13px] font-semibold text-ink">
+              <span className="tnum shrink-0 whitespace-nowrap text-[13px] font-semibold text-ink">
                 {brl(s.valor_retirado)}
               </span>
             </li>

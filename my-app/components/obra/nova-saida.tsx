@@ -97,7 +97,7 @@ export function NovaSaidaModal({ obraId }: { obraId: number }) {
         role="dialog"
         aria-modal="true"
         aria-label="Registrar saida"
-        className="max-h-[90vh] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-pop)] sm:p-6"
+        className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-pop)] sm:p-6"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-[18px] text-ink">Registrar saida</h2>

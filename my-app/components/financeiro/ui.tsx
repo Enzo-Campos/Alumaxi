@@ -75,7 +75,7 @@ export function ModalForm({
         aria-modal="true"
         aria-label={titulo}
         style={{ maxWidth: largura }}
-        className="max-h-[92vh] w-full overflow-y-auto rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-pop)] sm:p-6"
+        className="max-h-[92dvh] w-full overflow-y-auto rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-pop)] sm:p-6"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>

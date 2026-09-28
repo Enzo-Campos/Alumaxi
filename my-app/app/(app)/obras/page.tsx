@@ -18,7 +18,7 @@ export default async function ObrasPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-end justify-between">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-[32px] leading-none tracking-tight text-ink">
             Obras
@@ -50,10 +50,12 @@ export default async function ObrasPage() {
                 <li key={o.id}>
                   <Link
                     href={`/obras/${o.id}`}
-                    className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface"
+                    className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-surface sm:gap-4 sm:px-5"
                   >
+                    {/* celular: saldo desce para baixo do nome; a partir de sm, ao lado */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
                         <p className="text-[14px] font-semibold text-ink">{o.nome}</p>
                         <Pill tone={st.tone} dot>
                           {st.label}
@@ -64,19 +66,20 @@ export default async function ObrasPage() {
                         {dateBR(o.data_prevista_termino)}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="flex items-baseline justify-between gap-3 sm:block sm:text-right">
                       <p className="text-[10.5px] uppercase tracking-[0.12em] text-faint">
                         Saldo a receber
                       </p>
                       <p
-                        className={`tnum text-[14px] font-bold ${
+                        className={`tnum whitespace-nowrap text-[14px] font-bold ${
                           o.em_prejuizo ? "text-danger" : "text-success"
                         }`}
                       >
                         {brl(o.saldo_a_receber)}
                       </p>
                     </div>
-                    <ChevronRight size={16} className="text-faint" />
+                    </div>
+                    <ChevronRight size={16} className="shrink-0 text-faint" />
                   </Link>
                 </li>
               );

@@ -170,7 +170,7 @@ function CadastroForm({
         )}
 
         {tipo === "veiculo" && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className={labelCls}>Placa</label>
               <input className={`${field} uppercase`} value={f.placa ?? ""} onChange={set("placa")} placeholder="ABC1D23" />
@@ -192,7 +192,7 @@ function CadastroForm({
 
         {tipo === "fornecedor" && (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className={labelCls}>CPF / CNPJ</label>
                 <input className={field} inputMode="numeric" value={f.documento ?? ""} onChange={set("documento")} />
@@ -202,7 +202,7 @@ function CadastroForm({
                 <input className={field} inputMode="tel" value={f.telefone ?? ""} onChange={set("telefone")} placeholder="(13) 99999-9999" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className={labelCls}>E-mail</label>
                 <input type="email" className={field} value={f.email ?? ""} onChange={set("email")} />

@@ -33,14 +33,14 @@ export function FiltrosContas({ opcoes }: { opcoes: Opcoes }) {
     <div className={`flex flex-wrap items-center gap-2 transition-opacity ${pending ? "opacity-60" : ""}`}>
       {/* key: busca limpa/alterada pela URL remonta o campo com o valor novo */}
       <Busca key={params.get("q") ?? ""} inicial={params.get("q") ?? ""} aplica={(v) => aplica("q", v)} />
-      <select className={sel} value={params.get("sit") ?? ""} onChange={(e) => aplica("sit", e.target.value)} aria-label="Situacao">
+      <select className={`${sel} min-w-[140px] flex-1 sm:flex-none`}value={params.get("sit") ?? ""} onChange={(e) => aplica("sit", e.target.value)} aria-label="Situacao">
         {FILTRO_SITUACAO.map((s) => (
           <option key={s.value} value={s.value}>
             {s.value ? s.label : "Todas as situacoes"}
           </option>
         ))}
       </select>
-      <select className={sel} value={params.get("grupo") ?? ""} onChange={(e) => aplica("grupo", e.target.value)} aria-label="Grupo">
+      <select className={`${sel} min-w-[140px] flex-1 sm:flex-none`}value={params.get("grupo") ?? ""} onChange={(e) => aplica("grupo", e.target.value)} aria-label="Grupo">
         <option value="">Todos os grupos</option>
         {opcoes.grupos.map((g) => (
           <option key={g.id} value={g.id}>
@@ -48,7 +48,7 @@ export function FiltrosContas({ opcoes }: { opcoes: Opcoes }) {
           </option>
         ))}
       </select>
-      <select className={sel} value={params.get("func") ?? ""} onChange={(e) => aplica("func", e.target.value)} aria-label="Funcionario">
+      <select className={`${sel} min-w-[140px] flex-1 sm:flex-none`}value={params.get("func") ?? ""} onChange={(e) => aplica("func", e.target.value)} aria-label="Funcionario">
         <option value="">Qualquer funcionario</option>
         {opcoes.funcionarios.map((f) => (
           <option key={f.id} value={f.id}>
@@ -56,7 +56,7 @@ export function FiltrosContas({ opcoes }: { opcoes: Opcoes }) {
           </option>
         ))}
       </select>
-      <select className={sel} value={params.get("local") ?? ""} onChange={(e) => aplica("local", e.target.value)} aria-label="Local">
+      <select className={`${sel} min-w-[140px] flex-1 sm:flex-none`}value={params.get("local") ?? ""} onChange={(e) => aplica("local", e.target.value)} aria-label="Local">
         <option value="">Qualquer local</option>
         {opcoes.locais.map((l) => (
           <option key={l.id} value={l.id}>
@@ -64,7 +64,7 @@ export function FiltrosContas({ opcoes }: { opcoes: Opcoes }) {
           </option>
         ))}
       </select>
-      <select className={sel} value={params.get("veic") ?? ""} onChange={(e) => aplica("veic", e.target.value)} aria-label="Veiculo">
+      <select className={`${sel} min-w-[140px] flex-1 sm:flex-none`}value={params.get("veic") ?? ""} onChange={(e) => aplica("veic", e.target.value)} aria-label="Veiculo">
         <option value="">Qualquer veiculo</option>
         {opcoes.veiculos.map((v) => (
           <option key={v.id} value={v.id}>
@@ -97,11 +97,11 @@ function Busca({ inicial, aplica }: { inicial: string; aplica: (v: string) => vo
         e.preventDefault();
         aplica(busca.trim());
       }}
-      className="relative"
+      className="relative w-full sm:w-auto"
     >
       <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint" />
       <input
-        className={`${sel} w-[180px] pl-8`}
+        className={`${sel} w-full pl-8 sm:w-[180px]`}
         placeholder="Buscar descricao"
         value={busca}
         onChange={(e) => setBusca(e.target.value)}

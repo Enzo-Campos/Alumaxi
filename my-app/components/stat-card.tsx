@@ -16,26 +16,40 @@ export function StatCard({
   hint,
   icon: Icon,
   tone = "neutral",
+  hintDesktopOnly = false,
 }: {
   label: string;
   value: number | string;
   hint?: string;
+  /** esconde o hint no celular (abaixo de sm) */
+  hintDesktopOnly?: boolean;
   icon: LucideIcon;
   tone?: Tone;
 }) {
   const t = TONE[tone];
   return (
-    <div className="rounded-[var(--radius-card)] border border-line bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="flex items-start justify-between">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-faint">
+    // @container: o valor escala pela largura do proprio card (2 por linha no celular)
+    <div className="@container min-w-0 rounded-[var(--radius-card)] border border-line bg-card p-3.5 shadow-[var(--shadow-card)] sm:p-4">
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 text-[10px] font-semibold uppercase tracking-[0.1em] text-faint sm:text-[10.5px] sm:tracking-[0.14em]">
           {label}
         </p>
-        <span className={`grid h-7 w-7 place-items-center rounded-lg ${t.chipBg} ${t.chipFg}`}>
+        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${t.chipBg} ${t.chipFg}`}>
           <Icon size={15} strokeWidth={2.25} />
         </span>
       </div>
-      <p className={`tnum mt-3 font-display text-[30px] leading-none ${t.value}`}>{value}</p>
-      {hint && <p className="mt-1.5 text-[12px] text-muted">{hint}</p>}
+      <p
+        className={`tnum mt-3 whitespace-nowrap font-display text-[clamp(15px,12.5cqi,30px)] leading-none ${t.value}`}
+      >
+        {value}
+      </p>
+      {hint && (
+        <p
+          className={`mt-1.5 break-words text-[11.5px] leading-snug text-muted sm:text-[12px] ${hintDesktopOnly ? "hidden sm:block" : ""}`}
+        >
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

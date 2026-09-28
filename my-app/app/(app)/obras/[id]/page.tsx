@@ -37,9 +37,9 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
         </nav>
 
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-[32px] leading-none tracking-tight text-ink">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <h1 className="break-words font-display text-[26px] leading-none tracking-tight text-ink sm:text-[32px]">
                 {obra.nome}
               </h1>
               <Pill tone={statusMeta.tone} dot>
@@ -96,6 +96,7 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
           hint={`${fin.percentual_receita}% sobre ${brl(fin.orcamento_material)} de material`}
           icon={Wallet}
           tone="info"
+          hintDesktopOnly
         />
         <StatCard
           label="Ja retirado"
@@ -103,6 +104,7 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
           hint={`material ${brl(fin.total_compra_material)} · lucro ${brl(fin.total_retirada_lucro)}`}
           icon={TrendingDown}
           tone="neutral"
+          hintDesktopOnly
         />
         <StatCard
           label="Saldo a receber"
@@ -110,6 +112,7 @@ export default async function ObraPage(props: PageProps<"/obras/[id]">) {
           hint={fin.em_prejuizo ? "obra no prejuizo" : "quanto ainda entra nesta obra"}
           icon={fin.em_prejuizo ? TrendingDown : TrendingUp}
           tone={fin.em_prejuizo ? "danger" : "success"}
+          hintDesktopOnly
         />
         <StatCard
           label="Progresso"
